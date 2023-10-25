@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "todoApp",
-    "slug": "todoApp",
+    "slug": "todoapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,10 +21,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.henrique.pires.todoapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9bc046a3-abf0-41a8-a9ac-84d816e1c92b"
+      }
+    },
+    "owner": "henrique.pires"
   }
 }

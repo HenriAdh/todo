@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 
-const MyModal = ({ modalTitle, inputs=[], labels=[], button, hidenModal}) => {
+const MyModal = ({ modalTitle, children, button, hidenModal}) => {
     return (
         <View style={styles.backGround} >
             <View style={styles.container}>
@@ -13,19 +13,11 @@ const MyModal = ({ modalTitle, inputs=[], labels=[], button, hidenModal}) => {
                         <Text style={styles.exitButtonText}>x</Text>
                     </TouchableOpacity>
                 </View>
-                {inputs.length > 0 && 
-                    <View style={styles.margin} > 
-                        { inputs.map( input => input ) }
-                    </View>
-                }
-                {labels.length > 0 &&
-                    <View style={styles.margin} >
-                        { labels.map( label => label) }
-                    </View>
-                }
+                {children}
                 <View>
                     {button}
                 </View>
+                
             </View>
         </View>
     )
@@ -52,9 +44,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 30,
         textDecorationLine: 'underline'
-    },
-    margin: {
-        marginBottom: 20
     },
     header: {
         flexDirection: 'row',

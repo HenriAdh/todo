@@ -10,8 +10,9 @@ const Home = () => {
     const [modalViewItem, setModalViewItem] = useState(false);
     const [formNewItem, setFormNewItem] = useState({ title: '', desc: '' });
     const [actualItemId, setActualItemId] = useState(0);
-
     const [itensChecked, setItensChecked] = useState([]);
+    const [editingItem, setEditingItem] = useState(false);
+    const [editItem, setEditItem] = useState('');
 
     const fetchItens = () => [
         {
@@ -46,6 +47,19 @@ const Home = () => {
 
     const handleNewItem = () => {
         setModalNewItem(true);
+    }
+
+    const handleStartEditItem = () => {
+        setEditingItem(true);
+    }
+
+    const handleUpdateItem = () => {
+        let prev = [...listItens];
+        prev[actualItemId].desc = editItem;
+
+        setListitens(prev);
+        setEditItem('');
+        setEditingItem(false);
     }
 
     const handleFinishTasks = () => {
@@ -103,23 +117,25 @@ const Home = () => {
             <Modal visible={modalNewItem} animationType={'fade'} >
                 <MyModal
                     modalTitle={'Add New Item'}
-                    inputs={[
-                        <TextInput
-                            key={0}
-                            style={[styles.input, { marginBottom: 5 }]}
-                            onChangeText={val => setFormNewItem({ ...formNewItem, title: val })}
-                            value={formNewItem.title}
-                            placeholder={'Title'}
-                        />,
-                        <TextInput
-                            key={1}
-                            style={styles.input}
-                            onChangeText={text => setFormNewItem({ ...formNewItem, desc: text })}
-                            value={formNewItem.desc}
-                            placeholder={'Description'}
-                            multiline
-                        />
-                    ]}
+                    children={
+                        <View style={styles.margin}>
+                            <TextInput
+                                key={0}
+                                style={[styles.input, { marginBottom: 5 }]}
+                                onChangeText={val => setFormNewItem({ ...formNewItem, title: val })}
+                                value={formNewItem.title}
+                                placeholder={'Title'}
+                            />
+                            <TextInput
+                                key={1}
+                                style={styles.input}
+                                onChangeText={text => setFormNewItem({ ...formNewItem, desc: text })}
+                                value={formNewItem.desc}
+                                placeholder={'Description'}
+                                multiline
+                            />
+                        </View>
+                    }
                     button={
                         <Button
                             text={'Add'}
@@ -133,19 +149,38 @@ const Home = () => {
             <Modal visible={modalViewItem} animationType={'fade'} >
                 <MyModal
                     modalTitle={listItens[actualItemId]?.title}
-                    labels={[
-                        <Text
-                            key={actualItemId}
-                            style={styles.modalText}
-                        >
-                            {listItens[actualItemId]?.desc}
-                        </Text>
-                    ]}
-                    button={
+                    children={
+                        <View>
+                            {!editingItem ?
+                                <TouchableOpacity
+                                    onLongPress={() => handleStartEditItem()}
+                                >
+                                    <Text
+                                        key={actualItemId}
+                                        style={styles.modalText}
+                                    >
+                                    {listItens[actualItemId]?.desc}
+                                    </Text> 
+                                </TouchableOpacity>
+                                : <TextInput
+                                    style={styles.input}
+                                    onChangeText={text => setEditItem(text)}
+                                    value={listItens[actualItemId]?.desc}
+                                    placeholder={'Description'}
+                                    multiline
+                                />
+                            }
+                        </View>
+                    }
+                    button={ editingItem ? 
                         <Button
                             text={'Delete item'}
                             color={'red'}
                             action={() => handleDeleteItem()}
+                        /> : <Button
+                            text={'Update item'}
+                            color={'yellow'}
+                            action={() => handleUpdateItem()}
                         />
                     }
                     hidenModal={() => setModalViewItem(false)}
@@ -184,7 +219,10 @@ const styles = StyleSheet.create({
     modalText: {
         textAlign: 'justify',
         fontSize: 17
-    }
+    },
+    margin: {
+        marginBottom: 20
+    },
 })
 
 export default Home;

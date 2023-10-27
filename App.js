@@ -14,15 +14,17 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#eee',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   safeArea: {
     flex: 1,
     marginTop: StatusBar.currentHeight || 30,
+  },
+  container: {
+    flex: 1,
+    flexGrow: 1,
+    backgroundColor: '#eee',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
   },
   statusbar: {
     backgroundColor: '#F7EC09',

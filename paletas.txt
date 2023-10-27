@@ -1,0 +1,5 @@
+#E0FBFC Light Theme
+#C2DFE3 ||
+#9DB4C0 Both Themes
+#5C6B73 ||
+#253237 Dark Theme 

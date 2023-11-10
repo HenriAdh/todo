@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { StyleSheet, Text, TextInput, View } from "react-native"
+import { StyleSheet, Text, TextInput, ToastAndroid, View } from "react-native"
 import Button from "../../components/Button"
 import useStorage from "../../hooks/database"
 
@@ -8,9 +8,9 @@ export const NewTask = () => {
     const [formNewItem, setFormNewItem] = useState({title: '', desc: ''})
 
     const handleAddItem = async () => {
-        if(formNewItem.desc === '' || formNewItem.title === '') return alert('Campo vazio.')
+        if(formNewItem.desc === '' || formNewItem.title === '') return ToastAndroid.showWithGravity('Empty Field.', ToastAndroid.SHORT, ToastAndroid.CENTER,);
         const insert = await insertItem("@tasks", formNewItem)
-        alert(insert);
+        ToastAndroid.showWithGravity(insert, ToastAndroid.SHORT, ToastAndroid.CENTER, );
         setFormNewItem({title: '', desc: ''})
     }
 

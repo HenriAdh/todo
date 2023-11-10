@@ -15,10 +15,10 @@ const useStorage = () => {
             const tasks = await getItens(key);
             tasks.push(value);
             await AsyncStorage.setItem(key, JSON.stringify(tasks));
-            return 'Inserido com sucesso!';
+            return 'Success on insert!';
         } catch (e) {
             console.log(e);
-            return 'Falha ao inserir.';
+            return 'Error on insert.';
         }
     }
 
@@ -27,10 +27,10 @@ const useStorage = () => {
             const tasks = await getItens(key);
             tasks[id] = {...value};
             await AsyncStorage.setItem(key, JSON.stringify(tasks))
-            return 'Atualizado com sucesso!'
+            return 'Success on update!'
         } catch (e) {
             console.log(e);
-            return 'Erro ao atualizar.'
+            return 'Error on update.'
         }
     }
 

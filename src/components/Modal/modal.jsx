@@ -1,6 +1,7 @@
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 
-const MyModal = ({ modalTitle, children, button, hidenModal}) => {
+const MyModal = ({ modalTitle, children, button, hidenModal, textAux='' }) => {
     return (
         <View style={styles.backGround} >
             <View style={styles.container}>
@@ -10,14 +11,16 @@ const MyModal = ({ modalTitle, children, button, hidenModal}) => {
                         style={styles.exitButton}
                         onPress={() => hidenModal()}
                     >
-                        <Text style={styles.exitButtonText}>x</Text>
+                        <Ionicons size={20} color={'#F00'} name="close" />
                     </TouchableOpacity>
                 </View>
                 {children}
                 <View>
                     {button}
                 </View>
-                
+            </View>
+            <View style={styles.viewTextAux}>
+                <Text style={styles.textAux}>{textAux}</Text>
             </View>
         </View>
     )
@@ -31,7 +34,7 @@ const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        flexDirection: 'row',
+        flexDirection: 'column',
     },
     container: {
         backgroundColor: '#FFF',
@@ -49,11 +52,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    exitButtonText: {
-        fontSize: 20,
-        padding: 5
+    viewTextAux: {
+        marginTop: 25,
+    },
+    textAux: {
+        fontSize: 17,
     }
-
 })
 
 export default MyModal;

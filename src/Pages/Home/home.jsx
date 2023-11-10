@@ -1,86 +1,68 @@
-import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Switch, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
 import MyModal from '../../components/Modal/modal';
 import Button from '../../components/Button';
-import Item from './components/Itens';
+import Item from '../../components/itens/itens';
+import useStorage from '../../hooks/database';
+import { useIsFocused } from '@react-navigation/native';
 
-const Home = () => {
+export const Home = () => {
+    const { getItens, removeItem, updateItem, insertItem } = useStorage();
+    const isFocused = useIsFocused();
     const [listItens, setListitens] = useState([{ desc: '', title: '' }]);
-    const [modalNewItem, setModalNewItem] = useState(false);
     const [modalViewItem, setModalViewItem] = useState(false);
-    const [formNewItem, setFormNewItem] = useState({ title: '', desc: '' });
     const [actualItemId, setActualItemId] = useState(0);
-    const [itensChecked, setItensChecked] = useState([]);
     const [editingItem, setEditingItem] = useState(false);
     const [editItem, setEditItem] = useState('');
+    const [isLoading, setLoading] = useState(true);
 
-    const fetchItens = () => [
-        {
-            title: 'Cozinhar',
-            desc: 'Preparar arroz, feijão e mistura para a marmita.',
-        }, {
-            title: 'Arrumar a cama',
-            desc: 'Dobrar a coberta e esticar o lençol após se levantar.',
-        }, {
-            title: 'Tomar banho',
-            desc: 'Se limpar após um longo dia cansativo para recuperar as energias.',
-        },
-    ]
+    const fetchItens = useCallback(async () => {
+        const itens = await getItens("@tasks");
+        setListitens(itens);
+        setLoading(false);
+    }, [])
 
-    const handleAddItem = () => {
-        setListitens([...listItens, { ...formNewItem }]);
-        setFormNewItem({ title: '', desc: '' });
-        setModalNewItem(false);
-    }
-
-    const handleDeleteItem = () => {
-        const prev = listItens;
-        prev.splice(actualItemId, 1);
-        setListitens(prev);
-        setModalViewItem(false);
-    }
+    useEffect(() => {
+        setLoading(true);
+        fetchItens();
+    }, [fetchItens, isFocused])
 
     const handleOpenItem = (id) => {
-        setActualItemId(id)
-        setModalViewItem(true)
-    }
-
-    const handleNewItem = () => {
-        setModalNewItem(true);
+        setActualItemId(id);
+        setModalViewItem(true);
     }
 
     const handleStartEditItem = () => {
+        setEditItem(listItens[actualItemId].desc);
         setEditingItem(true);
     }
 
-    const handleUpdateItem = () => {
-        let prev = [...listItens];
+    const handleUpdateItem = async () => {
+        const prev = [...listItens];
         prev[actualItemId].desc = editItem;
-
-        setListitens(prev);
+        await updateItem("@tasks", actualItemId, prev[actualItemId]);
+        fetchItens();
         setEditItem('');
         setEditingItem(false);
     }
 
-    const handleFinishTasks = () => {
-        itensChecked.map(item => (
-            console.log(item)
-        ))
+    const handleDeleteItem = async () => {
+        await removeItem("@tasks", actualItemId);
+        fetchItens();
+        setEditingItem(false);
+        setModalViewItem(false);
     }
 
-    const handleToggleCheck = (id) => {
-        let tempList = [...itensChecked];
-        tempList[id] = tempList[id] ? false : true
-        setItensChecked(tempList);
+    const handleFinishTask = async () => {
+        await insertItem("@finishedTasks", listItens[actualItemId]);
+        await removeItem("@tasks", actualItemId);
+        fetchItens();
+        setEditingItem(false);
+        setModalViewItem(false);
     }
-
-    useEffect(() => {
-        setListitens(fetchItens())
-    }, [])
 
     return (
         <View style={styles.container}>
-
             <Text style={styles.title}>To-Do</Text>
 
             {listItens.length > 0 ?
@@ -92,98 +74,66 @@ const Home = () => {
                     >
                         <Item
                             title={item.title}
-                            onToggleCheck={() => handleToggleCheck(i)}
                         />
                     </TouchableOpacity>
-                )) : <ActivityIndicator size="small" color="#000" />
+                )) 
+                : isLoading ? <ActivityIndicator size="small" color="#000" /> : <Text>No tasks pending.</Text>
             }
-
-            <Button
-                text={'New item'}
-                color={'green'}
-                action={() => handleNewItem()}
-            />
-
-            {itensChecked.includes(true) ? (
-                <Button
-                    text={'Finish tasks'}
-                    color={'blue'}
-                    action={() => handleFinishTasks()}
-                />
-            ) : (
-                <></>
-            )}
-
-            <Modal visible={modalNewItem} animationType={'fade'} >
-                <MyModal
-                    modalTitle={'Add New Item'}
-                    children={
-                        <View style={styles.margin}>
-                            <TextInput
-                                key={0}
-                                style={[styles.input, { marginBottom: 5 }]}
-                                onChangeText={val => setFormNewItem({ ...formNewItem, title: val })}
-                                value={formNewItem.title}
-                                placeholder={'Title'}
-                            />
-                            <TextInput
-                                key={1}
-                                style={styles.input}
-                                onChangeText={text => setFormNewItem({ ...formNewItem, desc: text })}
-                                value={formNewItem.desc}
-                                placeholder={'Description'}
-                                multiline
-                            />
-                        </View>
-                    }
-                    button={
-                        <Button
-                            text={'Add'}
-                            color={'green'}
-                            action={() => handleAddItem()}
-                        />
-                    }
-                    hidenModal={() => setModalNewItem(false)}
-                />
-            </Modal>
             <Modal visible={modalViewItem} animationType={'fade'} >
                 <MyModal
                     modalTitle={listItens[actualItemId]?.title}
                     children={
                         <View>
                             {!editingItem ?
-                                <TouchableOpacity
-                                    onLongPress={() => handleStartEditItem()}
-                                >
-                                    <Text
-                                        key={actualItemId}
-                                        style={styles.modalText}
+                                <View>
+                                    <TouchableOpacity
+                                        onLongPress={() => handleStartEditItem()}
                                     >
-                                    {listItens[actualItemId]?.desc}
-                                    </Text> 
-                                </TouchableOpacity>
+                                        <Text
+                                            key={actualItemId}
+                                            style={styles.modalText}
+                                        >
+                                            {listItens[actualItemId]?.desc}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <Button
+                                        propStyle={styles.buttonProp}
+                                        text={'Finish task'}
+                                        color={'blue'}
+                                        icon={'checkbox-outline'}
+                                        action={() => handleFinishTask()}
+                                    />
+                                </View>
                                 : <TextInput
                                     style={styles.input}
                                     onChangeText={text => setEditItem(text)}
-                                    value={listItens[actualItemId]?.desc}
+                                    value={editItem}
                                     placeholder={'Description'}
                                     multiline
                                 />
                             }
                         </View>
                     }
-                    button={ editingItem ? 
+                    button={!editingItem ?
                         <Button
                             text={'Delete item'}
+                            icon={'trash-outline'}
                             color={'red'}
                             action={() => handleDeleteItem()}
                         /> : <Button
                             text={'Update item'}
                             color={'yellow'}
+                            icon={'create-outline'}
                             action={() => handleUpdateItem()}
                         />
                     }
-                    hidenModal={() => setModalViewItem(false)}
+                    hidenModal={
+                        () => {
+                            setEditingItem(false);
+                            setModalViewItem(false);
+                        }
+                    }
+                    textAux='Tap and hold description to edit.'
                 />
             </Modal>
         </View>
@@ -220,9 +170,9 @@ const styles = StyleSheet.create({
         textAlign: 'justify',
         fontSize: 17
     },
-    margin: {
-        marginBottom: 20
-    },
+    buttonProp: {
+        marginTop: 30
+    }
 })
 
 export default Home;

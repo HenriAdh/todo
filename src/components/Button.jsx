@@ -1,12 +1,14 @@
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-const Button = ({text, color, action}) => {
+const Button = ({text, color, action, propStyle={}, icon=undefined}) => {
     return (
         <TouchableOpacity
-            style={[styles.button, styles[color]]}
+            style={[styles.button, styles[color], propStyle]}
             onPress={() => action()}
         >
-            <Text style={styles.textButton}>{text}</Text>
+            <Text style={styles.textButton}>{icon ? <Ionicons size={17} color={'#FFF'} name={icon} /> : <></>} {text}</Text>
+            
         </TouchableOpacity>
     )
 }
@@ -30,6 +32,9 @@ const styles = StyleSheet.create({
     },
     blue: {
         backgroundColor: '#0B3EC7'
+    },
+    yellow: {
+        backgroundColor: '#F7C70B'
     },
 })
 
